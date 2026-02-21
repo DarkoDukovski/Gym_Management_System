@@ -10,6 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $sql = "UPDATE members SET trainer_id = ? WHERE member_id=?";
     $run = $conn->prepare($sql);
     $run->bind_param("ii", $trainer_id, $member_id);
+    $run->execute();
 
     $_SESSION['success_message'] = "Trainer assigned successfully";
     header("Location: admin_dashboard.php");

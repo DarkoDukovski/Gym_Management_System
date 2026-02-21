@@ -1,7 +1,19 @@
 <?php
 
-
 $current_page = basename($_SERVER['PHP_SELF']);
+
+$admin_username = "Admin";
+if (isset($_SESSION['admin_id']) && isset($conn)) {
+    $stmt_nav = $conn->prepare("SELECT username FROM admins WHERE admin_id = ?");
+    $stmt_nav->bind_param("i", $_SESSION['admin_id']);
+    $stmt_nav->execute();
+    $res_nav = $stmt_nav->get_result();
+    if ($res_nav->num_rows > 0) {
+        $row_nav = $res_nav->fetch_assoc();
+        $admin_username = $row_nav['username'];
+    }
+    $stmt_nav->close();
+}
 ?>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -162,6 +174,25 @@ $current_page = basename($_SERVER['PHP_SELF']);
         flex-shrink: 0;
     }
 
+    .fn-user {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        background: rgba(255, 255, 255, .04);
+        border: 1px solid rgba(255, 255, 255, .08);
+        border-radius: 12px;
+        color: #e5e7eb;
+        font-size: .8rem;
+        font-weight: 600;
+        letter-spacing: .3px;
+    }
+
+    .fn-user i {
+        color: #f59e0b;
+        font-size: .95rem;
+    }
+
     .fn-logout {
         display: flex;
         align-items: center;
@@ -296,6 +327,10 @@ $current_page = basename($_SERVER['PHP_SELF']);
             display: none;
         }
 
+        .fn-user {
+            display: none;
+        }
+
         .fn-logout {
             display: none;
         }
@@ -336,6 +371,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
         <!-- Right -->
         <div class="fn-right">
+            <div class="fn-user">
+                <i class="fas fa-user-circle"></i> <?php echo htmlspecialchars($admin_username); ?>
+            </div>
             <a href="logout.php" class="fn-logout">
                 <i class="fas fa-right-from-bracket"></i> Logout
             </a>
@@ -364,6 +402,11 @@ $current_page = basename($_SERVER['PHP_SELF']);
             class="fn-mobile-link <?php echo $current_page === 'register_admin.php' ? 'active' : ''; ?>">
             <i class="fas fa-user-shield"></i> New Admin
         </a>
+        <div class="fn-mobile-sep"></div>
+        <div class="fn-mobile-link" style="color:#e5e7eb; pointer-events:none;">
+            <i class="fas fa-user-circle" style="color:#f59e0b; background:rgba(245,158,11,.1);"></i>
+            <?php echo htmlspecialchars($admin_username); ?>
+        </div>
         <div class="fn-mobile-sep"></div>
         <a href="logout.php" class="fn-mobile-link fn-mob-logout">
             <i class="fas fa-right-from-bracket"></i> Logout
