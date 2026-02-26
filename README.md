@@ -30,7 +30,7 @@ A lightweight, modern web application for managing gym memberships, trainers, an
    - Username: `root`
    - Password: *(leave blank)*
    - Database: `gym`
-7. Open your browser and navigate to the project directory (e.g., `http://localhost/gym/` or `http://localhost/gym_menagement_system-main/` depending on what you named the folder).
+7. Open your browser and navigate to the project directory (e.g., `http://localhost/gym/` or `http://localhost/gym_management_system-main/` depending on what you named the folder).
 
 ## Usage
 
