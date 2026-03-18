@@ -969,7 +969,13 @@ require_once 'navbar.php';
                                     echo '<span class="badge b-gray"><i class="fas fa-circle"></i>None</span>';
                                 }
                                 ?></td>
-                                <td><img class="avatar" src="<?php echo $result['photo_path']; ?>"></td>
+                                <td><?php
+                                if (!empty($result['photo_path'])) {
+                                    echo '<img class="avatar" src="' . $result['photo_path'] . '">';
+                                } else {
+                                    echo '<div class="avatar" style="background:#1e2430;display:flex;align-items:center;justify-content:center"><i class="fas fa-user" style="color:#4b5563;font-size:.8rem"></i></div>';
+                                }
+                                ?></td>
                                 <td><?php
                                 $valid_until = $result['valid_until'];
                                 if ($valid_until && strtotime($valid_until) >= strtotime('today')) {

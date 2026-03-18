@@ -30,6 +30,21 @@ if (isset($_GET['member_id'])) {
 
     $photo_path = $_POST['photo_path'];
 
+    // Fetch old photo to delete if changed
+    $sql_old = "SELECT photo_path FROM members WHERE member_id = ?";
+    $stmt_old = $conn->prepare($sql_old);
+    $stmt_old->bind_param("i", $member_id);
+    $stmt_old->execute();
+    $result_old = $stmt_old->get_result();
+    if ($old_data = $result_old->fetch_assoc()) {
+        $old_photo = $old_data['photo_path'];
+        if (!empty($old_photo) && $old_photo !== $photo_path) {
+            if (file_exists($old_photo)) {
+                unlink($old_photo);
+            }
+        }
+    }
+
     $sql = "UPDATE members SET 
             first_name = ?, 
             last_name = ?, 
@@ -68,7 +83,7 @@ if (isset($_GET['member_id'])) {
         .page-wrap {
             max-width: 560px;
             margin: 0 auto;
-            padding: 0 1rem 3rem;
+            padding: 3rem 1rem 3rem;
         }
 
         .page-head {
@@ -437,7 +452,9 @@ if (isset($_GET['member_id'])) {
         </div>
 
         <div class="form-card">
-            <form action="edit_member.php" method="post" enctype="multipart/form-data">
+            <form action="edit_member.php" method="post" enctype="multipart/form-data"
+                  onkeydown="if(event.key === 'Enter' && event.target.tagName !== 'BUTTON') { event.preventDefault(); return false; }"
+                  onsubmit="if(!document.getElementById('validUntil').value) { alert('Мора да одберете Valid Until датум! / Please pick a valid date.'); return false; }">
                 <input type="hidden" name="member_id" value="<?php echo $member['member_id']; ?>">
 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 14px">
@@ -522,22 +539,23 @@ if (isset($_GET['member_id'])) {
         var myDropzone = new Dropzone("#dropzone-upload", {
             url: "upload_photo.php",
             paramName: "photo",
-            maxFilesize: 5,
+            maxFilesize: 15,
             acceptedFiles: "image/*",
             maxFiles: 1,
+            dictFileTooBig: "File is too big ({{filesize}}MB). Max filesize: {{maxFilesize}}MB.",
             dictDefaultMessage: "Drop new photo here to update (optional)",
             init: function () {
                 this.on("success", function (file, response) {
                     try {
-                        var jsonResponse = JSON.parse(response);
+                        var jsonResponse = (typeof response === "string") ? JSON.parse(response) : response;
                         if (jsonResponse.success) {
                             document.getElementById('photoPathInput').value = jsonResponse.photo_path;
-                        } else {
-                            console.error(jsonResponse.error);
                         }
-                    } catch (e) {
-                        console.error("Invalid JSON response", response);
-                    }
+                    } catch (e) {}
+                });
+                this.on("error", function (file, message) {
+                    document.getElementById('photoPathInput').value = '';
+                    alert("Photo upload failed: " + message);
                 });
                 this.on("addedfile", function () {
                     if (this.files[1] != null) {
@@ -662,6 +680,20 @@ if (isset($_GET['member_id'])) {
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.date-input-wrap')) {
                 calPopup.classList.remove('open');
+            }
+        });
+
+        document.querySelector('form').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                e.preventDefault();
+            }
+        });
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const validUntil = document.getElementById('validUntil');
+            if (validUntil && !validUntil.value) {
+                e.preventDefault();
+                alert('Please pick a Valid Until date.');
             }
         });
     </script>

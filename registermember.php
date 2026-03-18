@@ -24,7 +24,7 @@ require_once 'navbar.php';
         .page-wrap {
             max-width: 600px;
             margin: 0 auto;
-            padding: 0 1rem 3rem;
+            padding: 3rem 1rem 3rem;
             font-family: 'Inter', system-ui, sans-serif;
         }
 
@@ -440,6 +440,14 @@ require_once 'navbar.php';
 
         .dropzone .dz-preview .dz-image {
             border-radius: 8px !important;
+            width: 120px !important;
+            height: 120px !important;
+        }
+
+        .dropzone .dz-preview .dz-image img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
         }
 
         /* buttons */
@@ -540,7 +548,9 @@ require_once 'navbar.php';
         </div>
 
         <div class="form-card">
-            <form action="register_member.php" method="post" enctype="multipart/form-data">
+            <form action="register_member.php" method="post" enctype="multipart/form-data" 
+                  onkeydown="if(event.key === 'Enter' && event.target.tagName !== 'BUTTON') { event.preventDefault(); return false; }"
+                  onsubmit="if(!document.getElementById('validUntil').value) { alert('Мора да одберете Membership Plan или Valid Until датум! / Please pick a Membership Plan.'); return false; }">
 
                 <!-- Personal Info -->
                 <div class="section-label"><i class="fas fa-user"></i> Personal Information</div>
@@ -652,16 +662,21 @@ require_once 'navbar.php';
         Dropzone.options.dropzoneUpload = {
             url: "upload_photo.php",
             paramName: "photo",
-            maxFilesize: 20,
+            maxFilesize: 15, // 15MB limit
             acceptedFiles: "image/*",
+            dictFileTooBig: "File is too big ({{filesize}}MB). Max filesize: {{maxFilesize}}MB.",
             init: function () {
                 this.on("success", function (file, response) {
-                    const jsonResponse = JSON.parse(response);
-                    if (jsonResponse.success) {
-                        document.getElementById('photoPathInput').value = jsonResponse.photo_path;
-                    } else {
-                        console.error(jsonResponse.error);
-                    }
+                    try {
+                        const jsonResponse = (typeof response === "string") ? JSON.parse(response) : response;
+                        if (jsonResponse.success) {
+                            document.getElementById('photoPathInput').value = jsonResponse.photo_path;
+                        }
+                    } catch (e) {}
+                });
+                this.on("error", function (file, message) {
+                    document.getElementById('photoPathInput').value = '';
+                    alert("Photo upload failed: " + message);
                 });
             }
         };
@@ -792,6 +807,20 @@ require_once 'navbar.php';
             calMonth = d.getMonth();
             selectDay(d.getDate());
         }
+
+        document.querySelector('form').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                e.preventDefault();
+            }
+        });
+
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const validUntil = document.getElementById('validUntil');
+            if (validUntil && !validUntil.value) {
+                e.preventDefault();
+                alert('Please select a Membership Plan or a Valid Until date.');
+            }
+        });
     </script>
 
 </body>

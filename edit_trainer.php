@@ -30,6 +30,21 @@ if (isset($_GET['trainer_id'])) {
 
     $photo_path = $_POST['photo_path'];
 
+    // Fetch old photo to delete if changed
+    $sql_old = "SELECT photo_path FROM trainers WHERE trainer_id = ?";
+    $stmt_old = $conn->prepare($sql_old);
+    $stmt_old->bind_param("i", $trainer_id);
+    $stmt_old->execute();
+    $result_old = $stmt_old->get_result();
+    if ($old_data = $result_old->fetch_assoc()) {
+        $old_photo = $old_data['photo_path'];
+        if (!empty($old_photo) && $old_photo !== $photo_path) {
+            if (file_exists($old_photo)) {
+                unlink($old_photo);
+            }
+        }
+    }
+
     $sql = "UPDATE trainers SET 
             first_name = ?, 
             last_name = ?, 
@@ -67,7 +82,7 @@ if (isset($_GET['trainer_id'])) {
         .page-wrap {
             max-width: 560px;
             margin: 0 auto;
-            padding: 0 1rem 3rem;
+            padding: 3rem 1rem 3rem;
         }
 
         .page-head {
@@ -225,7 +240,8 @@ if (isset($_GET['trainer_id'])) {
         </div>
 
         <div class="form-card">
-            <form action="edit_trainer.php" method="post" enctype="multipart/form-data">
+            <form action="edit_trainer.php" method="post" enctype="multipart/form-data"
+                  onkeydown="if(event.key === 'Enter' && event.target.tagName !== 'BUTTON') { event.preventDefault(); return false; }">
                 <input type="hidden" name="trainer_id" value="<?php echo $trainer['trainer_id']; ?>">
 
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 14px">
@@ -285,28 +301,35 @@ if (isset($_GET['trainer_id'])) {
         var myDropzone = new Dropzone("#dropzone-upload", {
             url: "upload_photo.php",
             paramName: "photo",
-            maxFilesize: 5, // MB
+            maxFilesize: 15,
             acceptedFiles: "image/*",
             maxFiles: 1,
+            dictFileTooBig: "File is too big ({{filesize}}MB). Max filesize: {{maxFilesize}}MB.",
             dictDefaultMessage: "Drop new photo here to update (optional)",
             init: function () {
                 this.on("success", function (file, response) {
                     try {
-                        var jsonResponse = JSON.parse(response);
+                        var jsonResponse = (typeof response === "string") ? JSON.parse(response) : response;
                         if (jsonResponse.success) {
                             document.getElementById('photoPathInput').value = jsonResponse.photo_path;
-                        } else {
-                            console.error(jsonResponse.error);
                         }
-                    } catch (e) {
-                        console.error("Invalid JSON response", response);
-                    }
+                    } catch (e) {}
+                });
+                this.on("error", function (file, message) {
+                    document.getElementById('photoPathInput').value = '';
+                    alert("Photo upload failed: " + message);
                 });
                 this.on("addedfile", function () {
                     if (this.files[1] != null) {
                         this.removeFile(this.files[0]);
                     }
                 });
+            }
+        });
+
+        document.querySelector('form').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                e.preventDefault();
             }
         });
     </script>

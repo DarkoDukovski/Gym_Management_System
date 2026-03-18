@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .page-wrap {
             max-width: 500px;
             margin: 0 auto;
-            padding: 0 1rem 3rem;
+            padding: 3rem 1rem 3rem;
             font-family: 'Inter', system-ui, sans-serif;
         }
 

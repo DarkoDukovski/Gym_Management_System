@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .page-wrap {
             max-width: 600px;
             margin: 0 auto;
-            padding: 0 1rem 3rem;
+            padding: 3rem 1rem 3rem;
             font-family: 'Inter', system-ui, sans-serif;
         }
 
@@ -185,6 +185,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         .dropzone .dz-preview .dz-image {
             border-radius: 8px !important;
+            width: 120px !important;
+            height: 120px !important;
+        }
+
+        .dropzone .dz-preview .dz-image img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
         }
 
         /* buttons */
@@ -257,7 +265,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="form-card">
-            <form action="register_trainer.php" method="post" enctype="multipart/form-data">
+            <form action="register_trainer.php" method="post" enctype="multipart/form-data"
+                  onkeydown="if(event.key === 'Enter' && event.target.tagName !== 'BUTTON') { event.preventDefault(); return false; }">
 
                 <div class="section-label"><i class="fas fa-user"></i> Personal Information</div>
 
@@ -310,19 +319,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         Dropzone.options.trainerDropzone = {
             url: "upload_photo.php",
             paramName: "photo",
-            maxFilesize: 20,
+            maxFilesize: 15, // 15MB limit
             acceptedFiles: "image/*",
+            dictFileTooBig: "File is too big ({{filesize}}MB). Max filesize: {{maxFilesize}}MB.",
             init: function () {
                 this.on("success", function (file, response) {
-                    var jsonResponse = JSON.parse(response);
-                    if (jsonResponse.success) {
-                        document.getElementById('trainerPhotoInput').value = jsonResponse.photo_path;
-                    } else {
-                        console.error(jsonResponse.error);
+                    try {
+                        const jsonResponse = (typeof response === "string") ? JSON.parse(response) : response;
+                        if (jsonResponse.success) {
+                            document.getElementById('trainerPhotoInput').value = jsonResponse.photo_path;
+                        }
+                    } catch (e) {}
+                });
+                this.on("addedfile", function () {
+                    if (this.files[1] != null) {
+                        this.removeFile(this.files[0]);
                     }
+                });
+                this.on("error", function (file, message) {
+                    document.getElementById('trainerPhotoInput').value = '';
+                    alert("Photo upload failed: " + message);
                 });
             }
         };
+
+        document.querySelector('form').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+                e.preventDefault();
+            }
+        });
     </script>
 
 </body>
