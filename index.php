@@ -69,7 +69,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         .login-hero {
             display: flex;
             width: 100%;
-            background: linear-gradient(160deg, #0c0f16 0%, #1a1207 50%, #0c0f16 100%);
+            background: #151921;
             position: relative;
             overflow: hidden;
             padding: 3rem 1.5rem;
@@ -99,27 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             }
         }
 
-        .login-hero::before {
-            content: '';
-            position: absolute;
-            top: -30%;
-            right: -20%;
-            width: 500px;
-            height: 500px;
-            background: radial-gradient(circle, rgba(245, 158, 11, .08) 0%, transparent 70%);
-            border-radius: 50%;
-        }
 
-        .login-hero::after {
-            content: '';
-            position: absolute;
-            bottom: -20%;
-            left: -10%;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(245, 158, 11, .05) 0%, transparent 70%);
-            border-radius: 50%;
-        }
 
         .hero-content {
             position: relative;
