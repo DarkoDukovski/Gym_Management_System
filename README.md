@@ -2,6 +2,10 @@
 
 A lightweight, modern web application for managing gym memberships, trainers, and access control. Built with PHP, MySQL, and styled with Tailwind CSS for a fully responsive administrative dashboard.
 
+## Dashboard Preview
+
+<img width="3930" height="3432" alt="gymmanagement" src="https://github.com/user-attachments/assets/c088d30f-777a-4981-a159-4d777bbbf6ad" />
+
 ## Features
 
 - **Admin Dashboard:** Centralized overview of gym statistics, revenue tracking, and member distribution.
